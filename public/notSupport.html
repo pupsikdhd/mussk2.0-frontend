@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Браузер не поддерживается</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            text-align: center;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 450px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            animation: fadeIn 1s ease forwards;
+        }
+        h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        h2 {
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 25px;
+            color: #ddd;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #0070f3;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .button:hover {
+            background: #005bb5;
+            transform: translateY(-2px);
+        }
+        .browsers {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            opacity: 0.8;
+        }
+        .browsers img {
+            width: 40px;
+            height: 40px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⚠️ Браузер не поддерживается</h1>
+    <h2>Пожалуйста, используйте современный браузер для корректной работы сайта.</h2>
+    <div class="browsers">
+        <a href="https://www.google.com/chrome/"><img src="https://cdn.jsdelivr.net/gh/alrra/browser-logos/src/chrome/chrome_64x64.png" alt="Chrome"></a>
+
+        <a href="https://www.firefox.com/"><img src="https://cdn.jsdelivr.net/gh/alrra/browser-logos/src/firefox/firefox_64x64.png" alt="Firefox"></a>
+
+        <a href="https://www.microsoft.com/edge/"><img src="https://cdn.jsdelivr.net/gh/alrra/browser-logos/src/edge/edge_64x64.png" alt="Edge"></a>
+
+    </div>
+</div>
+</body>
+</html>
