@@ -1,13 +1,13 @@
 'use client'
 
-import {Geist, Geist_Mono, JetBrains_Mono} from "next/font/google";
+import {JetBrains_Mono} from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import {ModeToggle} from "@/components/theme/theme-toggle";
 import {Bounce, ToastContainer} from "react-toastify";
 import {useTheme} from "next-themes";
 import {GoogleOAuthProvider} from "@react-oauth/google";
 import {appConfig} from "@/config/app.config";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 
 
 const jetMono =  JetBrains_Mono({
@@ -23,6 +23,9 @@ export default function RootLayout({
 }>) {
     const { theme} = useTheme()
     console.log(theme);
+
+
+    const queryClient = new QueryClient()
   return (
 
     <html lang="ru" suppressHydrationWarning>
@@ -35,7 +38,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
       >
-
+<QueryClientProvider client={queryClient}>
           <GoogleOAuthProvider clientId={appConfig.oauth2Token}>
           {children}
           </GoogleOAuthProvider>
@@ -52,6 +55,7 @@ export default function RootLayout({
               theme={"dark"}
               transition={Bounce}
           />
+</QueryClientProvider>
       </ThemeProvider>
 
 

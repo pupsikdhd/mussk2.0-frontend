@@ -20,7 +20,7 @@ export default function AuthChecking() {
 
     useEffect(() => {
         setPhrase(phrases[Math.floor(Math.random() * phrases.length)]);
-    }, []);
+    }, [phrases]);
 
     return (
         <motion.div

@@ -1,4 +1,4 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { sessionConfig } from "@/config/session.config";
 import { appConfig } from "@/config/app.config";
@@ -20,36 +20,43 @@ export async function POST(req: Request) {
             headers: {
                 "Content-Type": "application/json",
                 "User-Agent": useragent,
-
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify({
+                login: body.login,
+                password: body.password,
+                captchaToken: body.CaptchaToken,
+                fingerPrint: body.fingerPrint,
+            }),
         });
-
-        if (!res.ok) {
-            const errorText = await res.text();
-            return NextResponse.json({ message: "Invalid credentials", details: errorText }, { status: 401 });
-        }
 
         const data = await res.json();
 
-        const token = data.token;
-        if (!token) {
-            return NextResponse.json({ message: "No token returned from backend" }, { status: 500 });
+
+
+        if (data.message === "MFA") {
+            console.log("MFA")
+            return NextResponse.json({ mfa: true, challenge: data.token });
+
+        }
+
+        if (!data.token) {
+            return NextResponse.json({ message: data.message || "Ошибка входа" }, { status: 401 });
         }
 
         const cookieStore = await cookies();
-        cookieStore.set(sessionConfig.cookieName, token, {
+        cookieStore.set(sessionConfig.cookieName, data.token, {
             sameSite: "strict",
             httpOnly: true,
             secure: true,
             maxAge: sessionConfig.maxAge,
-            path: "/"
+            path: "/",
         });
 
         return NextResponse.json({ success: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Login API error:", err);
         return NextResponse.json(
+            //@ts-expect-error try-catch
             { message: "Server error", error: err.message },
             { status: 500 }
         );

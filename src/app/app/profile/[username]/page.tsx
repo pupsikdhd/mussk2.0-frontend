@@ -1,6 +1,5 @@
 import ProfileComponent from "@/components/custom/Profile/profile";
-import {Post} from "@/types/Post.type";
-import {MiniProfile, Profile} from "@/types/Profile.type";
+import { Profile} from "@/types/Profile.type";
 
 
 interface PageProps {

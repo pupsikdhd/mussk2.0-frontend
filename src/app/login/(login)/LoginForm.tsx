@@ -1,26 +1,37 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { toast } from "react-toastify";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { appConfig } from "@/config/app.config";
-//@ts-expect-error : libError
-import ReCAPTCHA from "react-google-recaptcha";
+
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
-export default function LoginForm() {
+import { useMutation } from '@tanstack/react-query';
+import TurnstileCaptcha from "@/components/custom/Auth/TurnstileCaptcha";
+
+
+
+
+interface Props {
+    RedirectUrl?: string;
+}
+
+
+export default function LoginForm({RedirectUrl}: Props) {
     const [login, setLogin] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [reToken, setReToken] = useState<string | null>(null);
+    const [CaptchaToken, setCaptchaToken] = useState<string | null>(null);
     const [fingerPrint, setFingerPrint] = useState<string | null>(null);
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const redirect = sanitizeRedirect(searchParams.get("redirect") || appConfig.mainPage);
+    const redirect = sanitizeRedirect(RedirectUrl || appConfig.mainPage);
+
+
 
     useEffect(() => {
         const loadFingerPrint = async () => {
@@ -29,7 +40,12 @@ export default function LoginForm() {
             setFingerPrint(result.visitorId);
         };
         loadFingerPrint();
+
+
     }, []);
+
+
+
 
     function sanitizeRedirect(redirect?: string): string {
         if (!redirect) return appConfig.mainPage;
@@ -45,23 +61,13 @@ export default function LoginForm() {
         }
     }
 
-    async function onSubmit() {
-        if (!login || !password) {
-            toast.error("Укажите логин и пароль");
-            return;
-        }
 
-        if (!reToken) {
-            toast.error("Подтвердите, что вы не робот 🧠🤖");
-            return;
-        }
+    const loginMutation = useMutation({
+        mutationFn: async () => {
+            if (!login || !password) throw new Error("Укажите логин и пароль");
+            if (!CaptchaToken) throw new Error("Подтвердите, что вы не робот 🧠🤖");
+            if (!fingerPrint) throw new Error("Ошибка определения устройства. Попробуйте снова.");
 
-        if (!fingerPrint) {
-            toast.error("Ошибка определения устройства. Попробуйте снова.");
-            return;
-        }
-
-        try {
             const res = await fetch("/api/login", {
                 method: "POST",
                 headers: {
@@ -70,19 +76,28 @@ export default function LoginForm() {
                 body: JSON.stringify({
                     login,
                     password,
-                    reToken,
-                    fingerPrint,
+                    CaptchaToken,
+                    fingerPrint
                 }),
-            });
+            }).then((res) => {
+                if (res.status === 200) {
+                    res.json().then((data) => {
+                        if(data.mfa === true && data.challenge){
+                            localStorage.setItem("challenge", data.challenge);
+                            router.push(`/login/mfa?redirect=${redirect}`);
+                        }
 
-            if (!res.ok) throw new Error("Неверный логин или пароль");
+                    })
+                }
 
-            toast.success("Вход успешен 🚀");
-            router.push(redirect);
-        } catch (err: any) {
-
-            toast.error(err.message || "Ошибка входа");
+            }).catch((err) => {toast.error(err)});
         }
+    });
+
+
+
+    function onSubmit() {
+        loginMutation.mutate();
     }
 
     return (
@@ -120,6 +135,7 @@ export default function LoginForm() {
                             }}
                         >
                             <div className="flex flex-col gap-6">
+                                {/* ... Поля Логин и Пароль остаются без изменений ... */}
                                 <motion.div
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
@@ -156,14 +172,15 @@ export default function LoginForm() {
                                     transition={{ delay: 0.3 }}
                                     className="flex justify-center mt-2"
                                 >
-                                    <ReCAPTCHA
-                                        sitekey={appConfig.reCaptchaToken}
-                                        onChange={(token: string) => setReToken(token)}
-                                    />
+                                    <TurnstileCaptcha onChange={setCaptchaToken} className="flex justify-center mt-2" />
                                 </motion.div>
 
-                                <Button type="submit" className="w-full mt-4 transition-transform">
-                                    Войти
+                                <Button
+                                    type="submit"
+                                    className="w-full mt-4 transition-transform"
+                                    disabled={loginMutation.isPending}
+                                >
+                                    {loginMutation.isPending ? "Вход..." : "Войти"}
                                 </Button>
                             </div>
                         </form>

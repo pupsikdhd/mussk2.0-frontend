@@ -1,10 +1,8 @@
 'use client'
 import { Post } from "@/types/Post.type";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {Heart, Share2 } from "lucide-react";
-import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 import ShareModal from "@/components/custom/share-modal";
